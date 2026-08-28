@@ -77,10 +77,10 @@ def main():
 
     # 4. Create configuration for Docker Model Runner if not present, and update context_length if changed
     api_name = 'Docker Model Runner'
-    api_endpoint = os.getenv('CUSTOM_API_ENDPOINT')
-    api_key = os.getenv('CUSTOM_API_KEY')
-    api_model = os.getenv('CUSTOM_API_MODEL', '')
-    api_context = os.getenv('CUSTOM_CONTEXT_LENGTH')
+    api_endpoint = os.getenv('LLM_API_ENDPOINT')
+    api_key = os.getenv('LLM_API_KEY')
+    api_model = os.getenv('LLM_API_MODEL', '')
+    api_context = os.getenv('LLM_CONTEXT_LENGTH')
     if api_endpoint and api_key:
         if 'custom_providers' not in config or config['custom_providers'] is None:
             config['custom_providers'] = []
@@ -133,30 +133,39 @@ def main():
             write_config = True
             print('INFO: Hindsight memory manager enabled.')
 
-            # Also update /home/hermes/.hermes/hindsight/config.json
+            # Create /home/hermes/.hermes/hindsight/config.json if not present
             hindsight_config_path = os.getenv('HERMES_HOME') + os.sep + 'hindsight'
             Path(hindsight_config_path).mkdir(exist_ok=True)
             hindsight_config_path += os.sep + 'config.json'
-            if Path(hindsight_config_path).exists():
-                with open(config_path, "r", encoding="utf-8") as f:
-                    try:
-                        hindsight_config = json.load(f)
-                    except json.JSONDecodeError:
-                        hindsight_config = {}
-            else:
+            if not Path(hindsight_config_path).exists():
                 hindsight_config = {}
-            hindsight_config.update({
-                "mode": "local_external",
-                "api_url": "http://hindsight:8888",
-                "bank_id": "hermes",
-                "api_key": os.getenv('HINDSIGHT_API_KEY', '')
-            })
-            try:
-                with open(hindsight_config_path, "w", encoding="utf-8") as f:
-                    json.dump(hindsight_config, f, indent=2)
-                print(f'INFO: Updated: {hindsight_config_path}')
-            except:
-                print(f'WARN: Could not update file: {hindsight_config_path}')
+                hindsight_config.update({
+                    "mode": "local_external",
+                    "api_url": "http://hindsight:8888",
+                    "bank_id": "hermes",
+                    "api_key": os.getenv('HINDSIGHT_API_KEY', ''),
+                    "timeout": 120,
+                    "idle_timeout": 300,
+                    "retain_tags": "",
+                    "observation_scopes": "",
+                    "retain_source": "",
+                    "retain_user_prefix": "User",
+                    "retain_assistant_prefix": "Assistant",
+                    "banks": {
+                        "hermes": {
+                            "bankId": "hermes",
+                            "budget": "mid",
+                            "enabled": True
+                        }
+                    },
+                    "recall_budget": "mid"
+                })
+                try:
+                    with open(hindsight_config_path, "w", encoding="utf-8") as f:
+                        json.dump(hindsight_config, f, indent=2)
+                    print(f'INFO: Created: {hindsight_config_path}')
+                except:
+                    print(f'WARN: Could not create file: {hindsight_config_path}')
     else:
         if 'memory' not in config or config['memory'] is None:
             config['memory'] = {}
@@ -166,6 +175,10 @@ def main():
             config['memory']['user_profile_enabled'] = 'true'
             write_config = True
             print('INFO: Hindsight memory manager disabled.')
+            hindsight_config_path = os.getenv('HERMES_HOME') + os.sep + 'hindsight' + os.sep + 'config.json'
+            if Path(hindsight_config_path).exists():
+                Path(hindsight_config_path).rename(hindsight_config_path + '.old')
+                print(f'INFO: Renamed: {hindsight_config_path} as {hindsight_config_path}.old')
 
     # 7. Write out config file if flagged as changed
     if write_config == True:

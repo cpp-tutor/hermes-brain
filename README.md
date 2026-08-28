@@ -27,13 +27,13 @@ mkdir dummy-secrets-cache ~/Workspace
 
 ### Usage
 
-Inspect the `.env` file which should allow loading with default settings, to enable the Hindsight memory server it is necessary to provide at least:
+Inspect the `.env` file which should allow loading with default settings, to enable the Hindsight memory server it is necessary to set:
 
 ```bash
 HERMES_USE_HINDSIGHT=true
-HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL=your-Docker-hosted-embeddings
-HINDSIGHT_API_LLM_MODEL=your-Docker-hosted-model # MUST have context window size above 64000
 ```
+
+And then add other Hindsight configuration variables from [this example configuration](https://github.com/vectorize-io/hindsight/blob/main/.env.example) (in order to set up LLM and embeddings providers). Note that the dimensions for the vector store backend cannot be changed once configured, so choose the embeddings model with care.
 
 Then decide on any, all or none from the profiles `webui`, `dashboard`, `mcp` and `memory` (or use `--profile all` instead of multiple `--profile ...`), such as:
 
@@ -79,21 +79,21 @@ su hermes # Important, or files get root permissions
 hermes [command] [options...]
 ```
 
-4. To use Gemini embeddings (3072 dimensions), it is necessary to make changes to the Hindsight container part of the compose script.
+4. To use Gemini embeddings (3072 dimensions), it is necessary to make use of a different database backend or limit the dimensions to under 2000.
 
 5. An internet connection is necessary for the Docker MCP service to load.
 
-6. The amount of allocated memory and CPU capacity is guesswork at the moment, look out for OOM errors.
+6. It appears necessary to set interface:port instead of just port for several of the containers
 
-7. Loads more... please raise issues.
+7. Should you run `hermes` as root user by accident, it may be necessary to use `chown` as above to restore permissions.
+
+8. The amount of allocated memory and CPU capacity is guesswork at the moment, look out for OOM errors.
+
+9. Probably many more... please raise issues.
 
 ### Credits
 
-These scripts are based upon the following resources:
-
-https://github.com/nesquena/hermes-webui/blob/master/docker-compose.three-container.yml
-
-https://github.com/vectorize-io/hindsight/blob/main/docker/docker-compose/local-llm/docker-compose.yaml
+These scripts are based upon the following two: [docker-compose.three-container.yml](https://github.com/nesquena/hermes-webui/blob/master/docker-compose.three-container.yml) and [local-llm/docker-compose.yaml](https://github.com/vectorize-io/hindsight/blob/main/docker/docker-compose/local-llm/docker-compose.yaml)
 
 Any bugs introduced are most likely the fault of myself, refer to these two for detailed comments and explanations.
 
@@ -104,5 +104,7 @@ The software is alpha-quality at present; please raise issues and submit PRs in 
 This is free software released under the MIT license (as for the Hermes-related portions of its dependencies).
 
 ### Release History
+
+**2026/08/28**: Initial release of 1.0-beta
 
 **2026/08/25**: Initial release of 1.0-alpha

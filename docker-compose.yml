@@ -13,9 +13,9 @@ services:
       - HERMES_HOME=/home/hermes/.hermes
       - HERMES_UID=${UID:-1000}
       - HERMES_GID=${GID:-1000}
-      - CUSTOM_API_MODEL=${CUSTOM_API_MODEL}
-      - CUSTOM_API_ENDPOINT=${CUSTOM_API_ENDPOINT:-http://model-runner.docker.internal/v1}
-      - CUSTOM_API_KEY=${CUSTOM_API_KEY:-None}
+      - LLM_API_MODEL=${LLM_API_MODEL}
+      - LLM_API_ENDPOINT=${LLM_API_ENDPOINT:-http://model-runner.docker.internal/v1}
+      - LLM_API_KEY=${LLM_API_KEY:-None}
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN:-hermes-mcp-server}
       - HERMES_USE_HINDSIGHT=${HERMES_USE_HINDSIGHT:-false}
       - HINDSIGHT_API_KEY=${HINDSIGHT_API_KEY:-hermes-memory-server}
@@ -160,7 +160,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
           cpus: "1.0"
     networks:
       - hermes-net
@@ -178,17 +178,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - "${HINDSIGHT_API_PORT:-127.0.0.1:8888}:8888"
+      - "${HINDSIGHT_PORT:-127.0.0.1:8888}:8888"
       - "${HINDSIGHT_WEBUI_PORT:-127.0.0.1:9999}:9999"
     environment:
-      - HINDSIGHT_API_EMBEDDINGS_PROVIDER=${HINDSIGHT_API_EMBEDDINGS_PROVIDER:-openai}
-      - HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL=${HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL:-http://model-runner.docker.internal/v1}
-      - HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL=${HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL}
-      - HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY=${HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY:-None}
-      - HINDSIGHT_API_LLM_PROVIDER=${HINDSIGHT_API_LLM_PROVIDER:-openai}
-      - HINDSIGHT_API_LLM_BASE_URL=${HINDSIGHT_API_LLM_BASE_URL:-http://model-runner.docker.internal/v1}
-      - HINDSIGHT_API_LLM_MODEL=${HINDSIGHT_API_LLM_MODEL}
-      - HINDSIGHT_API_LLM_API_KEY=${HINDSIGHT_API_LLM_API_KEY:-None}
       - HINDSIGHT_API_KEY=${HINDSIGHT_API_KEY:-hermes-memory-server}
       - HINDSIGHT_API_PORT=8888
     deploy:
