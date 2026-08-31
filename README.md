@@ -7,9 +7,8 @@ The Hermes Agent is able to be run on many platforms and this repository is an a
 Clone the repo and navigate using PowerShell or Command Window (shown) to its directory. Create necessary directories for launch:
 
 ```plaintext
-cd \path\to\hermes-brain
-mkdir dummy-secrets-cache
 mkdir %USERPROFILE%\Documents\Workspace
+cd \path\to\hermes-brain
 ```
 
 (These directories are used by the MCP server and Hermes WebUI, respectively.)
@@ -19,8 +18,8 @@ mkdir %USERPROFILE%\Documents\Workspace
 Clone the repo and navigate using a terminal to its directory. Create necessary directories for launch:
 
 ```bash
+mkdir ~/Workspace
 cd /path/to/hermes-brain
-mkdir dummy-secrets-cache ~/Workspace
 ```
 
 (These directories are used by the MCP server and Hermes WebUI, respectively.)

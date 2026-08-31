@@ -13,7 +13,7 @@ services:
       - HERMES_HOME=/home/hermes/.hermes
       - HERMES_UID=${UID:-1000}
       - HERMES_GID=${GID:-1000}
-      - LLM_API_MODEL=${LLM_API_MODEL}
+      - LLM_API_MODEL=${LLM_API_MODEL:-}
       - LLM_API_ENDPOINT=${LLM_API_ENDPOINT:-http://model-runner.docker.internal/v1}
       - LLM_API_KEY=${LLM_API_KEY:-None}
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN:-hermes-mcp-server}
@@ -152,11 +152,12 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DOCKER_MCP_IN_CONTAINER=1
+      - DOCKER_CONTEXT=default 
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN:-hermes-mcp-server}
     volumes:
-      - //var/run/docker.sock:/var/run/docker.sock
-      - ${USERPROFILE}/.docker:/root/.docker:ro
-      - ./dummy_secrets_cache:/root/.cache/docker-secrets-engine
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${LOCALAPPDATA}/docker-secrets-engine/engine.sock:/root/.cache/docker-secrets-engine/engine.sock:ro
+      - ${USERPROFILE}/.docker/mcp:/root/.docker/mcp:ro
     deploy:
       resources:
         limits:
