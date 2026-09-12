@@ -75,11 +75,11 @@ def main():
                     write_config = True
                     print('INFO: "Authorization:" for "docker_gateway:" updated.')
 
-    # 4. Create configuration for Docker Model Runner if not present, and update context_length if changed
-    api_name = 'Docker Model Runner'
+    # 4. Create configuration for Docker Model Runner (or other provider) if not present, and update context_length if changed
+    api_name = 'Hermes Custom Provider'
     api_endpoint = os.getenv('LLM_API_ENDPOINT')
     api_key = os.getenv('LLM_API_KEY')
-    api_model = os.getenv('LLM_API_MODEL', '')
+    api_model = os.getenv('LLM_DEFAULT_MODEL', '')
     api_context = os.getenv('LLM_CONTEXT_LENGTH')
     if api_endpoint and api_key:
         if 'custom_providers' not in config or config['custom_providers'] is None:

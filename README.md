@@ -32,7 +32,11 @@ Inspect the `.env` file which should allow loading with default settings, to ena
 HERMES_USE_HINDSIGHT=true
 ```
 
-And then add other Hindsight configuration variables from [this example configuration](https://github.com/vectorize-io/hindsight/blob/main/.env.example) (in order to set up LLM and embeddings providers). Note that the dimensions for the vector store backend cannot be changed once configured, so choose the embeddings model with care.
+And then add other required Hindsight configuration variables from [this example configuration](https://github.com/vectorize-io/hindsight/blob/main/.env.example) (in order to set up LLM and embeddings providers).
+
+* Note: See the file [README-Hindsight.md](./README-Hindsight.md) for example senarios and configurations.
+
+* Note: The dimensions for the vector store backend cannot be changed once configured, so choose the embeddings model with care.
 
 Then decide on any, all or none from the profiles `webui`, `dashboard`, `mcp` and `memory` (or use `--profile all` instead of multiple `--profile ...`), such as:
 
@@ -48,7 +52,7 @@ docker compose --profile all up -d
 
 Note that `-f` selects a filename other than the default (docker-compose.yml), while `-d` indicates the process runs in the background after loading.
 
-After several minutes of pulling the dependencies of the containers and sinitializing them, the `preconfigure.py` script should run successfully and allow all of them to start. The above command must be repeated for any changes to `.env` (or the compose script itself).
+After several minutes of pulling the dependencies of the containers and initializing them, the `preconfigure.py` script should run successfully and allow all of them to start. The above command must be repeated for any changes to `.env` (or the compose script itself).
 
 ### Upgrades
 
@@ -88,7 +92,20 @@ hermes [command] [options...]
 
 8. The amount of allocated memory and CPU capacity is guesswork at the moment, look out for OOM errors.
 
-9. Probably many more... please raise issues.
+9. When using Docker CLI under Linux it is not possible to run Docker MCP tools from the Hermes WebUI although these run as expected under Docker Desktop. *(Under investigation)*
+
+10. Docker containers must have become ready within 300s or they are restarted. The Hindsight container will attempt to download embeddings and reranker models by default so a fast connection (or suitable configuration) is necessary to avoid a failed loop.
+
+### Volumes
+
+Care has been taken to ensure no anonymous volumes are created for the various different containers. See the Docker compose scripts for mountpoints within each container for these volumes, the purposes are described below:
+
+* hermes-home: All session and configuration data (do not delete)
+* hermes-memory: All memories and facts (PostgreSQL data, do not delete)
+* hermes-agent-src: Shared Python source (delete before upgrading)
+* hermes-data: Various persistent data for: nousresearch/hermes-agent:latest
+* hermes-mcp: Various persistent data for: docker/mcp-gateway:latest
+* hermes-cache: Downloaded embeddings and reranker models for Hindsight
 
 ### Credits
 
@@ -96,13 +113,15 @@ These scripts are based upon the following two: [docker-compose.three-container.
 
 Any bugs introduced are most likely the fault of myself, refer to these two for detailed comments and explanations.
 
-The software is alpha-quality at present; please raise issues and submit PRs in case of suggestions for improvement.
+The software is believed fully functional at present with reference to the known issues above; please raise GitHub issues and submit PRs in case of suggestions for improvement.
 
 ### License
 
 This is free software released under the MIT license (as for the Hermes-related portions of its dependencies).
 
 ### Release History
+
+**2026/08/12**: Release of version 1.0
 
 **2026/08/28**: Initial release of 1.0-beta
 

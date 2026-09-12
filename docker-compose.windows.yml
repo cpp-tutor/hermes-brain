@@ -5,6 +5,7 @@ services:
     command: python3 /tmp/preconfigure.py
     volumes:
       - hermes-home:/home/hermes/.hermes
+      - hermes-data:/opt/data
       # Script to set password hash and configure MCP server
       - ./preconfigure.py:/tmp/preconfigure.py:ro
     environment:
@@ -13,7 +14,7 @@ services:
       - HERMES_HOME=/home/hermes/.hermes
       - HERMES_UID=${UID:-1000}
       - HERMES_GID=${GID:-1000}
-      - LLM_API_MODEL=${LLM_API_MODEL:-}
+      - LLM_DEFAULT_MODEL=${LLM_DEFAULT_MODEL:-}
       - LLM_API_ENDPOINT=${LLM_API_ENDPOINT:-http://model-runner.docker.internal/v1}
       - LLM_API_KEY=${LLM_API_KEY:-None}
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN:-hermes-mcp-server}
@@ -41,10 +42,11 @@ services:
     ports:
       - "${SERVER_PORT:-127.0.0.1:8642}:8642"
     volumes:
-      # Persist config, state, sessions, skills, memory across restarts
+      # Persist config, state, sessions, skills across restarts
       - hermes-home:/home/hermes/.hermes
       # Expose agent source so the WebUI can install dependencies from it
       - hermes-agent-src:/opt/hermes
+      - hermes-data:/opt/data
     environment:
       - HERMES_HOME=/home/hermes/.hermes
       - HERMES_UID=${UID:-1000}
@@ -114,6 +116,7 @@ services:
       - "${DASHBOARD_PORT:-127.0.0.1:9119}:9119"
     volumes:
       - hermes-home:/home/hermes/.hermes
+      - hermes-data:/opt/data
     environment:
       - HERMES_HOME=/home/hermes/.hermes
       - HERMES_UID=${UID:-1000}
@@ -158,6 +161,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${LOCALAPPDATA}/docker-secrets-engine/engine.sock:/root/.cache/docker-secrets-engine/engine.sock:ro
       - ${USERPROFILE}/.docker/mcp:/root/.docker/mcp:ro
+      - hermes-mcp:/misc
     deploy:
       resources:
         limits:
@@ -184,6 +188,7 @@ services:
     environment:
       - HINDSIGHT_API_KEY=${HINDSIGHT_API_KEY:-hermes-memory-server}
       - HINDSIGHT_API_PORT=8888
+      - HINDSIGHT_API_WORKER_ID=hermes
     deploy:
       resources:
         limits:
@@ -191,6 +196,7 @@ services:
           cpus: "2.0"
     volumes:
       - hermes-memory:/home/hindsight/.pg0
+      - hermes-cache:/home/hindsight/.cache
     networks:
       - hermes-net
     env_file:
@@ -205,5 +211,8 @@ networks:
 
 volumes:
   hermes-home:
-  hermes-agent-src:
   hermes-memory:
+  hermes-agent-src:
+  hermes-data:
+  hermes-mcp:
+  hermes-cache:
