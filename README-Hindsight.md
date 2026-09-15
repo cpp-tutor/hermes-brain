@@ -17,7 +17,6 @@ For best performance use a remote cloud API (Google Gemini shown, but many other
 
 * LLM provider and embeddings provider can be different.
 * The LLM is able to be changed at any time, but the embeddings model must not be changed once the vector database has been created.
-* `HINDSIGHT_API_ENABLE_RERANKING=false` seems to be ignored, so to disable (increasing the load on the Hermes LLM model configured elsewhere) use an invalid API key.
 
 ```
 HINDSIGHT_API_LLM_PROVIDER=gemini
@@ -29,10 +28,18 @@ HINDSIGHT_API_EMBEDDINGS_GEMINI_MODEL=gemini-embedding-001
 HINDSIGHT_API_EMBEDDINGS_GEMINI_API_KEY=your-google-cloud-api-key
 HINDSIGHT_API_EMBEDDINGS_GEMINI_OUTPUT_DIMENSIONALITY=1536
 
-HINDSIGHT_API_ENABLE_RERANKING=false
 HINDSIGHT_API_RERANKER_PROVIDER=cohere
-HINDSIGHT_API_RERANKER_COHERE_API_KEY=optional-use-your-cohere-api-key-to-enable
+HINDSIGHT_API_RERANKER_COHERE_API_KEY=your-cohere-api-key
 ```
+
+Note: To disable reranking altogether (not recommended) replace the final two lines above with:
+
+```
+HINDSIGHT_API_ENABLE_RERANKING=false
+HINDSIGHT_API_RERANKER_PROVIDER=rrf
+```
+
+* `HINDSIGHT_API_ENABLE_RERANKING=false` seems to be ignored, so to disable (increasing the load on the Hermes LLM model configured elsewhere) use Reciprocal Rank Fusion method (only).
 
 ### Scenario 2: Local-only
 
@@ -46,7 +53,7 @@ By default, Hindsight uses its own embeddings and reranker models, both of which
 ```
 HINDSIGHT_API_LLM_PROVIDER=ollama
 HINDSIGHT_API_LLM_BASE_URL=http://host.docker.internal:11434/v1
-HINDSIGHT_API_LLM_MODEL=llama3.1:8b
+HINDSIGHT_API_LLM_MODEL=llama3.1:8b-instruct
 HINDSIGHT_API_LLM_OLLAMA_NUM_CTX=16384
 
 HINDSIGHT_API_EMBEDDINGS_PROVIDER=local
@@ -90,5 +97,5 @@ Note: To configure these models before use (ideally before starting the Hindsigh
 ```batch
 docker model configure --context-size 16384 --keep-alive 30m granite-4.0-h-tiny
 docker model configure --context-size 512 --keep-alive 30m --mode embedding nomic-embed-text-v2-moe
-docker model configure --context-size 514 --keep-alive 30m huggingface.co/pyarn/bge-reranker-v2-m3-Q8_0-GGUF:Q8_0 -- --flash-attn on --n-gpu-layers 99
+docker model configure --context-size 514 --keep-alive 30m huggingface.co/pyarn/bge-reranker-v2-m3-Q8_0-GGUF:Q8_0
 ```
